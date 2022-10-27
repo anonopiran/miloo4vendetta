@@ -1,0 +1,20 @@
+- name: Prepare
+  hosts: relay
+  roles:
+    - prepare
+  tags:
+    - prepare
+
+- name: Prepare for relay
+  hosts: relay
+  roles:
+    - relay-prep
+  tags:
+    - relay-prep
+
+- name: Deploy service
+  hosts: relay
+  roles:
+    - deploy
+  tags:
+    - deploy

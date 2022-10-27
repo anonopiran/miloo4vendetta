@@ -1,0 +1,24 @@
+- name: Create project structure | docker hosts
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user }}"
+    mode: u=rwx,g=r,o=r
+  loop:
+    - "{{ project_root }}"
+    - "{{ service_path }}"
+  when: server_type == 'docker'
+  tags: 
+    - docker
+    - structure
+
+  
+- name: Dependencies | docker hosts
+  become: true
+  import_tasks: dependencies-docker.yaml
+  when: server_type == 'docker'
+  tags: 
+    - docker
+    - dependencies

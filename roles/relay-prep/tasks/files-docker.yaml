@@ -1,0 +1,17 @@
+- name: Get existing
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: file_state
+  loop:
+    - "{{ relay__files__compose_file }}"
+#  ....................
+#  ....................
+- name: Docker-compose file 
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'templates/docker-compose.yaml.j2') | from_yaml | to_nice_yaml }}"
+    dest: "{{ relay__files__compose_file }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0640
+  when: relay__files__compose_override or 
+    (not file_state.results[0].stat.exists)

@@ -1,0 +1,98 @@
+{% set vmess_users = [] %}
+{% set trojan_users = [] %}
+
+{% for uid in vtr_uuids %}
+    {{ vmess_users.append({'email':uid,'id':uid}) }}
+    {{ trojan_users.append({'email':uid,'password':uid}) }}
+{% endfor %}
+
+inbounds:
+- listen: 0.0.0.0
+  port: {{ vtr__files__loadbalancer_target_port_ws_vmess }}
+  protocol: vmess
+  settings:
+    clients: {{ vmess_users }} 
+  streamSettings:
+    network: ws
+    security: none
+    wsSettings:
+      path: "/"
+  tag: ws_vmess
+- listen: 0.0.0.0
+  port: {{ vtr__files__loadbalancer_target_port_ws_trojan }}
+  protocol: trojan
+  settings: 
+    clients: {{ trojan_users}}
+  streamSettings:
+    network: ws
+    security: none
+    wsSettings:
+      path: "/trojan"
+  tag: ws_trojan
+- listen: 0.0.0.0
+  port: {{ vtr__files__loadbalancer_target_port_grpc_vmess }}
+  protocol: vmess
+  settings:
+    clients: {{ vmess_users }}
+  streamSettings:
+    grpcSettings:
+      serviceName: vmess
+    network: grpc
+    security: none
+  tag: grpc_vmess
+- listen: 0.0.0.0
+  port: {{ vtr__files__loadbalancer_target_port_h2_vmess }}
+  protocol: vmess
+  settings:
+    clients: {{ vmess_users }}
+  streamSettings:
+    httpSettings:
+      path: /h2/vmess
+    network: http
+    security: none
+  tag: h2_vmess
+- listen: 0.0.0.0
+  port: {{ vtr__files__loadbalancer_target_port_grpc_trojan }}
+  protocol: trojan
+  settings:
+    clients: {{ trojan_users }}
+  streamSettings:
+    grpcSettings:
+      serviceName: trojan
+    network: grpc
+    security: none
+  tag: grpc_trojan
+- listen: 0.0.0.0
+  port: {{ vtr__files__loadbalancer_target_port_h2_trojan }}
+  protocol: trojan
+  settings:
+    clients: {{ trojan_users }}
+  streamSettings:
+    httpSettings:
+      path: /h2/trojan
+    network: http
+    security: none
+  tag: h2_trojan
+outbounds:
+- protocol: freedom
+  settings:
+    domainStrategy: AsIs
+  tag: direct
+- protocol: blackhole
+  settings:
+    type: http
+  tag: block
+routing:
+  domainStrategy: IPIfNonMatch
+  rules:
+  - ip:
+    - geoip:private
+    - 0.0.0.0
+    outboundTag: block
+    type: field
+dns:
+  servers:
+  - 1.1.1.1
+log:
+  access: none
+  loglevel: error

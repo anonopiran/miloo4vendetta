@@ -1,0 +1,16 @@
+server_type: docker  # valid values: docker, oc
+ctrl__connect_w_proxy: none # valid values: none, http, socks
+
+project_root: "~{{ ansible_user }}/{{ root_name }}"
+service_path: "{{ project_root }}/service"
+
+_ssh_socks_proxy_syntax: "-o 'ProxyCommand=nc -X 5 -x {{ socks_proxy_server }} %h %p'"
+_ssh_socks_http_syntax: "-o 'ProxyCommand=nc -X connect -x {{ http_proxy_server }} %h %p'"
+
+oc_args:
+  host: "{{ ansible_oc_host }}"
+  api_key: "{{ ansible_oc_token }}"
+  namespace: "{{ ansible_oc_namespace }}"
+
+ansible_connection: "{{ 'ssh' if server_type=='docker' else 'local' if server_type=='oc' }}"
+ansible_ssh_common_args: "{{ _ssh_socks_proxy_syntax if ctrl__connect_w_proxy == 'socks' else _ssh_socks_http_syntax if ctrl__connect_w_proxy == 'http' }}"

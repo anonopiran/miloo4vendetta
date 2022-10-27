@@ -1,0 +1,2 @@
+vtr__cert__infered_source_fullchain_path: "{{ vtr__cert__le_path+'/fullchain.pem' if vtr__cert__source=='le' else vtr__cert__source_fullchain_path if vtr__cert__source=='local' }}"
+vtr__cert__infered_source_privatekey_path: "{{ vtr__cert__le_path+'/privkey.pem' if vtr__cert__source=='le' else vtr__cert__source_privatekey_path if vtr__cert__source=='local' }}"

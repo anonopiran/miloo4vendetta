@@ -1,0 +1,49 @@
+- name: Get existing
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: file_state
+  loop:
+    - "{{ vtr__files__uuid_file }}"
+
+#  ....................
+#  ....................
+- name: Generate uuid
+  ansible.builtin.get_url:
+    url: "{{ vtr__files__uuid_gen_url }}"
+    dest: "{{ vtr__files__uuid_file }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0640
+  when: vtr__files__uuid_override or 
+    (not file_state.results[0].stat.exists)
+
+- name: Read remote uuid
+  ansible.builtin.slurp:
+    src: "{{ vtr__files__uuid_file }}"
+  register: uuid_file
+
+- name: V2fly config file 
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'templates/v2fly.yaml.j2') | from_yaml | to_nice_json }}"
+    dest: "{{ vtr__files__v2fly_conf_file }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0640
+  vars:
+    vtr_uuids: "{{ uuid_file.content | b64decode | from_json }}"
+
+- name: HAP config file 
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'templates/hap.conf.j2') }}"
+    dest: "{{ vtr__files__loadbalancer_conf_file }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0640
+    
+- name: Docker-compose file 
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'templates/docker-compose.yaml.j2') | from_yaml | to_nice_yaml }}"
+    dest: "{{ vtr__files__compose_file }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0640

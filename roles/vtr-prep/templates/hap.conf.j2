@@ -1,0 +1,36 @@
+global
+    user haproxy
+    group haproxy
+
+defaults
+    mode http
+    timeout connect 5s
+    timeout client 30s
+    timeout server 30s
+
+frontend {{ root_name }}_front
+    maxconn 60000
+    bind 0.0.0.0:{{ vtr__files__loadbalancer_listen_port }} ssl crt /cert/full.pem alpn h2,http/1.1
+    # ... vmess
+    use_backend ws_vmess if { path / }
+    use_backend grpc_vmess if { path /vmess/Tun }
+    use_backend h2_vmess if { path /h2/vmess }
+    # ... trojan
+    use_backend ws_trojan if { path /trojan }
+    use_backend grpc_trojan if { path /trojan/Tun }
+    use_backend h2_trojan if { path /h2/trojan }
+
+# ... vmess
+backend ws_vmess
+    server server1 {{ vtr__files__loadbalancer_target_domain }}:{{ vtr__files__loadbalancer_target_port_ws_vmess }}
+backend grpc_vmess
+    server server1 {{ vtr__files__loadbalancer_target_domain }}:{{ vtr__files__loadbalancer_target_port_grpc_vmess }} proto h2
+backend h2_vmess
+    server server1 {{ vtr__files__loadbalancer_target_domain }}:{{ vtr__files__loadbalancer_target_port_h2_vmess }} proto h2
+# ... vmess
+backend ws_trojan
+    server server1 {{ vtr__files__loadbalancer_target_domain }}:{{ vtr__files__loadbalancer_target_port_ws_trojan }}
+backend grpc_trojan
+    server server1 {{ vtr__files__loadbalancer_target_domain }}:{{ vtr__files__loadbalancer_target_port_grpc_trojan }} proto h2
+backend h2_trojan
+    server server1 {{ vtr__files__loadbalancer_target_domain }}:{{ vtr__files__loadbalancer_target_port_h2_trojan }} proto h2

@@ -1,0 +1,9 @@
+- block:
+  - name: Deploy deployment
+    community.okd.k8s:
+      resource_definition: "{{ deploy__deployment_def }}"
+      apply: true
+      state: present
+  
+  module_defaults:
+    community.okd.k8s: "{{ oc_args }}"

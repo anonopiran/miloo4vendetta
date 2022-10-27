@@ -1,0 +1,24 @@
+- name: Image | docker hosts
+  become: true
+  import_tasks: image-docker.yaml
+  when: server_type == 'docker'
+  tags:
+    - docker
+    - image
+
+- name: Start service | docker hosts
+  become: true
+  community.docker.docker_compose:
+    project_src: "{{ service_path }}"
+    recreate: always
+    remove_orphans: true
+  when: server_type == 'docker'
+  tags:
+    - docker
+
+- name: Start service | oc hosts
+  import_tasks: deploy-kuber.yaml
+  when: server_type == 'oc'
+  tags:
+    - oc
+    

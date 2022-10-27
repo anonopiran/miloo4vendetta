@@ -1,0 +1,35 @@
+- name: Create image directory
+  ansible.builtin.file:
+    path: "{{ deploy__image__remote_path }}"
+    state: directory
+    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user }}"
+    mode: u=rwx,g=r,o=r
+
+- name: Get existing docker-images
+  community.docker.docker_image_info:
+    name: "{{ item }}"
+  register: image_state
+  loop: "{{ deploy__image__images_2_copy | map(attribute='name') }}"
+
+- name: Set local images to copy
+  ansible.builtin.set_fact:
+    images_2_copy: "{{ images_2_copy + [item[0]] }}"
+  loop: "{{ deploy__image__images_2_copy | zip(image_state.results | map(attribute='images')) }}"
+  when: item[1] | length == 0
+
+- name: Copy images to remote
+  ansible.builtin.copy:
+    src: "files/images/{{ item.file_name }}"
+    dest: "{{ deploy__image__remote_path }}/{{ item.file_name }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+  loop: "{{ images_2_copy }}"
+
+- name: Load images
+  community.docker.docker_image:
+    name: "{{ item.name }}"
+    load_path: "{{ deploy__image__remote_path }}/{{ item.file_name }}"
+    source: load
+  loop: "{{ images_2_copy }}"

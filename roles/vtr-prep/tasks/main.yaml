@@ -1,0 +1,32 @@
+- name: Create VTR structure | docker hosts
+  become: true
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    group: "{{ ansible_user }}"
+    owner: "{{ ansible_user }}"
+    mode: u=rwx,g=r,o=r
+  loop:
+    - "{{ vtr__cert__path }}"
+    - "{{ vtr__files__v2fly_conf_path }}"
+    - "{{ vtr__files__loadbalancer_conf_path }}"
+  when: server_type == 'docker'
+  tags: 
+    - docker
+    - structure
+
+- name: Certify | docker hosts
+  become: true
+  import_tasks: cert-docker.yaml
+  when: server_type == 'docker'
+  tags:
+    - docker
+    - certificate
+
+- name: Files | docker hosts
+  become: true
+  import_tasks: files-docker.yaml
+  when: server_type == 'docker'
+  tags:
+    - docker
+    - files

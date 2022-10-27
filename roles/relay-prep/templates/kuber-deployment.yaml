@@ -1,0 +1,39 @@
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "{{ root_name }}-deploy"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "{{ root_name }}"
+  strategy:
+    rollingUpdate:
+      maxSurge: "25%"
+      maxUnavailable: "25%"
+    type: "RollingUpdate"
+  template:
+    metadata:
+      labels:
+        app: "{{ root_name }}"
+    spec:
+      containers:
+      - args:
+        - "client"
+        - "--listen=0.0.0.0:{{ relay__files__listen_port }}"
+        - "--target={{ relay__files__target_url }}"
+        - "--unsafe-listen"
+        - "--disable-authentication"
+        image: "ghostunnel/ghostunnel:latest"
+        imagePullPolicy: "IfNotPresent"
+        name: "{{ root_name }}"
+        ports:
+        - containerPort: {{ relay__files__listen_port }}
+        resources:
+          limits:
+            &limit
+            cpu: "100m"
+            ephemeral-storage: "100M"
+            memory: "100M"
+          requests: *limit
+      restartPolicy: "Always"

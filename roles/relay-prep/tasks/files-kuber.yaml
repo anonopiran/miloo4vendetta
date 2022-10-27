@@ -1,0 +1,12 @@
+- block:
+  - name: Create service
+    community.okd.k8s:
+      state: present
+      template: templates/kuber-service.yaml
+  
+  - name: Set deployment definition
+    ansible.builtin.set_fact:
+      deploy__deployment_def: "{{ lookup('template', 'templates/kuber-deployment.yaml') | from_yaml }}"
+  
+  module_defaults:
+    community.okd.k8s: "{{ oc_args }}"

@@ -1,0 +1,58 @@
+- name: Get update flag
+  ansible.builtin.stat:
+    path: "{{ vtr__cert__le_flag_path }}"
+  register: cert_update_flag
+#  ....................
+#  ....................
+- name: Get lets encrypt cert
+  community.docker.docker_container:
+    name: banana-certbot
+    image: certbot/certbot:latest
+    command: "certonly --standalone --agree-tos -n -m {{ vtr__email }} -d {{ vtr__domain }}"
+    ports:
+      - 80:80
+    volumes:
+      - "{{ vtr__cert__path }}/letsencrypt:/etc/letsencrypt"
+    state: started
+    user: root:root
+    detach: false
+    auto_remove: false
+  when:
+    - vtr__cert__source=='le'
+    - vtr__cert__le__override or
+      (not cert_update_flag.stat.exists)
+  register: le_state
+
+- name: Set le update flag
+  ansible.builtin.file:
+    path: "{{ vtr__cert__le_flag_path }}"
+    state: touch
+    mode: u=rw,g=rw,o=rw
+  when: 
+  - le_state is succeeded
+  - le_state is not skipped
+
+- name: Store certs
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: true
+    mode: u=rw,g=,o=
+  loop:
+    - src: "{{ vtr__cert__infered_source_fullchain_path }}"
+      dest: "{{ vtr__cert__fullchain_file }}"
+    - src: "{{ vtr__cert__infered_source_privatekey_path }}"
+      dest: "{{ vtr__cert__privatekey_file }}"
+
+- name: Create full cert
+  ansible.builtin.shell:
+    cmd: "cat {{ vtr__cert__fullchain_file }} {{ vtr__cert__privatekey_file }} > {{ vtr__cert__full_file }}"
+
+- name: Cert dir permissions
+  ansible.builtin.file:
+    path: "{{ vtr__cert__path }}"
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+    mode: u=rwx,g=,o=

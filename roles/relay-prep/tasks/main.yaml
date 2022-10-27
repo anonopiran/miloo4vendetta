@@ -1,0 +1,14 @@
+- name: Files | docker hosts
+  become: true
+  import_tasks: files-docker.yaml
+  when: server_type == 'docker'
+  tags:
+    - docker
+    - files
+
+- name: Files | oc hosts
+  import_tasks: files-kuber.yaml
+  when: server_type == 'oc'
+  tags:
+    - oc
+    - files

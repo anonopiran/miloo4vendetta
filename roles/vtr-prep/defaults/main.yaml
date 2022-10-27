@@ -1,0 +1,44 @@
+vtr__cert__path: "{{ service_path }}/cert"
+vtr__cert__fullchain_file: "{{ vtr__cert__path }}/fullchain.pem"
+vtr__cert__privatekey_file: "{{ vtr__cert__path }}/privatekey.pem"
+vtr__cert__full_file: "{{ vtr__cert__path }}/full.pem"
+vtr__cert__le_path: "{{ vtr__cert__path }}/letsencrypt/live/{{ vtr__domain }}"
+vtr__cert__le_flag_path: "{{ project_root }}/.cert_le_update.flag"
+
+vtr__cert__source: le # valid values: le, local
+vtr__cert__le__override: false
+vtr__cert__source_fullchain_path: 
+vtr__cert__source_privatekey_path:
+
+vtr__file__tunnel: true
+vtr__file__loadbalancer: true
+vtr__file__v2fly: true
+
+vtr__files__loadbalancer_conf_path: "{{ service_path }}/hap-data"
+vtr__files__loadbalancer_conf_file: "{{ vtr__files__loadbalancer_conf_path }}/haproxy.cfg"
+vtr__files__v2fly_conf_path: "{{ service_path }}/v2fly-data"
+vtr__files__v2fly_conf_file: "{{ vtr__files__v2fly_conf_path }}/config.json"
+vtr__files__uuid_file: "{{ vtr__files__v2fly_conf_path }}/user-uid"
+vtr__files__uuid_override: false
+vtr__files__compose_file: "{{ service_path }}/docker-compose.yaml"
+
+vtr__v2fly__domain: "{{ root_name }}_v2f"
+
+vtr__files__loadbalancer_listen_port: 445
+vtr__files__loadbalancer_domain: "{{ root_name }}_hap"
+vtr__files__loadbalancer_target_domain: "{{ vtr__v2fly__domain }}"
+vtr__files__loadbalancer_target_port_ws_vmess: 10800
+vtr__files__loadbalancer_target_port_grpc_vmess: 10820
+vtr__files__loadbalancer_target_port_h2_vmess: 10822
+vtr__files__loadbalancer_target_port_ws_trojan: 10810
+vtr__files__loadbalancer_target_port_grpc_trojan: 10830
+vtr__files__loadbalancer_target_port_h2_trojan: 10832
+vtr__files__loadbalancer_expose: false
+
+vtr__files__tunnel_listen_port: 444
+vtr__files__tunnel_domain: "{{ root_name }}_ghost"
+vtr__files__tunnel_target_domain: "{{ vtr__files__loadbalancer_domain }}"
+vtr__files__tunnel_target_port: "{{ vtr__files__loadbalancer_listen_port }}"
+
+vtr__files__uuid_no: 50
+vtr__files__uuid_gen_url: "https://www.uuidtools.com/api/generate/v4/count/{{ vtr__files__uuid_no }}"

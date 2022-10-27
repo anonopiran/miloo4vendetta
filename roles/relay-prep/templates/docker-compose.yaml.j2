@@ -1,0 +1,13 @@
+version: "3"
+services:
+  {{ root_name }}_ghostunnel:
+    image: "ghostunnel/ghostunnel:latest"
+    ports:
+    - "{{ relay__files__listen_port }}:{{ relay__files__listen_port }}"
+    command:
+    - "client"
+    - "--listen=0.0.0.0:{{ relay__files__listen_port }}"
+    - "--target={{ relay__files__target_url }}"
+    - "--unsafe-listen"
+    - "--disable-authentication"
+    restart: "unless-stopped"

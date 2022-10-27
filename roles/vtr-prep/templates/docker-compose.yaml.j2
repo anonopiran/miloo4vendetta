@@ -1,0 +1,45 @@
+version: "3"
+services:
+{% if vtr__file__tunnel %}
+  {{ root_name }}_ghostunnel:
+    image: "ghostunnel/ghostunnel:latest"
+    hostname: "{{ vtr__files__tunnel_domain }}"
+    ports:
+    - "{{ vtr__files__tunnel_listen_port }}:{{ vtr__files__tunnel_listen_port }}"
+    volumes:
+    - "{{ vtr__cert__path }}:/cert"
+    command:
+    - "server"
+    - "--listen=0.0.0.0:{{ vtr__files__tunnel_listen_port }}"
+    - "--target={{ vtr__files__tunnel_target_domain }}:{{ vtr__files__tunnel_target_port }}"
+    - "--cert=/cert/fullchain.pem"
+    - "--key=/cert/privatekey.pem"
+    - "--unsafe-target"
+    - "--disable-authentication"
+    restart: "unless-stopped"
+{% endif %}
+{% if vtr__file__loadbalancer %}
+  {{ root_name }}_hap:
+    image: "haproxy:latest"
+    hostname: "vtr__files__loadbalancer_domain"
+{% if vtr__files__loadbalancer_expose %}
+    ports:
+    - "{{ vtr__files__loadbalancer_listen_port }}:{{ vtr__files__loadbalancer_listen_port }}"
+{% endif %}
+    volumes:
+    - "{{ vtr__files__loadbalancer_conf_path }}:/usr/local/etc/haproxy"
+    - "{{ vtr__cert__path }}:/cert"
+    user: "root:root"
+    restart: "unless-stopped"
+{% endif %}
+{% if vtr__file__v2fly %}
+  {{ root_name }}_v2fly:
+    image: "v2fly/v2fly-core:latest"
+    hostname: "{{ root_name }}_v2f"
+    volumes:
+    - "{{ vtr__files__v2fly_conf_path }}:/etc/v2ray"
+    environment:
+      v2ray.vmess.aead.forced: "false"
+    command: "v2ray run -d /etc/v2ray"
+    restart: "unless-stopped"
+{% endif %}

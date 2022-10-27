@@ -1,0 +1,2 @@
+deploy__image__images_2_copy: []
+deploy__image__remote_path: "{{ project_root }}/images"

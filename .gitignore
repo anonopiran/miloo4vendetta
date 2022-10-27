@@ -1,0 +1,7 @@
+
+.vscode/
+
+inventory/*
+!inventory/group_vars
+roles/deploy/files/images/*
+!roles/deploy/files/images/get.sh

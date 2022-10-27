@@ -1,0 +1,13 @@
+"apiVersion": "v1"
+"kind": "Service"
+"metadata":
+  "name": "{{ root_name }}-loadbalancer"
+"spec":
+  "ports":
+  - "name": "tcp-{{ relay__files__listen_port }}"
+    "port": {{ relay__files__listen_port | int }}
+    "targetPort": {{ relay__files__listen_port | int }}
+    "protocol": "TCP"
+  "selector":
+    "app": "{{ root_name }}"
+  "type": "LoadBalancer"

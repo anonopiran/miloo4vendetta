@@ -1,0 +1,8 @@
+root_name: banana-relay
+
+relay_image_copy: true
+relay_images_2_copy:
+  - name: ghostunnel/ghostunnel:latest
+    file_name: ghostunnel_latest
+
+deploy__image__images_2_copy: "{{ relay_images_2_copy if relay_image_copy else [] }}"

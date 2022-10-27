@@ -1,0 +1,6 @@
+relay__files__compose_file: "{{ service_path }}/docker-compose.yaml"
+
+relay__files__compose_override: false
+
+relay__files__listen_port: 445
+relay__files__target_url: "{{ hostvars[relay__files__target_host]['vtr__domain'] }}:{{ hostvars[relay__files__target_host]['vtr__files__tunnel_listen_port'] }}"

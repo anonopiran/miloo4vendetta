@@ -1,0 +1,24 @@
+- name: Update apt packages
+  ansible.builtin.apt:
+    update_cache: true
+  ignore_errors: true
+  when:
+    - ansible_facts['os_family'] == "Debian"
+    - prepare__dep__apt_update
+
+- name: Install dependencies
+  ansible.builtin.package:
+    name:
+      - "docker"
+      - "docker-compose"
+      - "wget"
+      - "python3-pip"
+    state: present
+  when: prepare__dep__package
+
+- name: Install python dependencies
+  ansible.builtin.pip:
+    name:
+      - docker
+      - docker-compose  
+  when: prepare__dep__python

@@ -1,0 +1,20 @@
+- name: Prepare
+  hosts: vtr
+  roles:
+    - prepare
+  tags:
+    - prepare
+
+- name: Prepare for vtr
+  hosts: vtr
+  roles:
+    - vtr-prep
+  tags:
+    - vtr-prep
+
+- name: Deploy service
+  hosts: vtr
+  roles:
+    - deploy
+  tags:
+    - deploy
